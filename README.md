@@ -35,6 +35,10 @@ set PYTHONPATH=src
 
 :: backtest (technical + IV-regime + macro only - see Limitations)
 .venv\Scripts\python -m zerodte_outlook.backtest
+
+:: run the test suite
+.venv\Scripts\python -m pip install -r requirements-dev.txt
+.venv\Scripts\python -m pytest tests/ -v
 ```
 
 In production this runs on a schedule via GitHub Actions
@@ -52,7 +56,7 @@ env-overridable):
 |---|---|---|
 | Technical | Overnight futures gap (vol-normalized) + RSI mean-reversion nudge (Day); 5d/20d SMA slope (Week) | `sources/market.py` |
 | IV regime | VIX vs its 20d average, VIX9D/VIX term-structure inversion | `sources/market.py` |
-| Options flow | Put/call OI ratio (self-calibrated z-score), spot vs the zero-gamma flip strike, max pain | `sources/options_chain.py` |
+| Options flow | Put/call OI ratio (self-calibrated z-score, contrarian). Spot vs the zero-gamma flip strike and max pain are computed and shown in the email but not currently scored (see `features.options_flow_signal` docstring) | `sources/options_chain.py` |
 | Sentiment | CNN Fear & Greed (contrarian) | `sources/sentiment.py` |
 | Macro | **Not** a composite input (see below) | `sources/macro_calendar.py` |
 
@@ -81,6 +85,26 @@ number. "Week" is a rolling 5-trading-day-forward close, not strictly the
 calendar Friday. Full methodology and per-VIX-regime breakdown in
 `backtest.py` and `data/backtest_report.md` (regenerate with `python -m
 zerodte_outlook.backtest`).
+
+## Reliability
+
+- **Tests**: `tests/` covers the pure-math/logic functions (Black-Scholes
+  gamma, zero-gamma-flip/max-pain, RSI, composite scoring, macro calendar
+  rules, and the prediction-resolution logic) and runs on every push via
+  `.github/workflows/tests.yml`. It exists because every real bug found
+  while building this (a timezone-join bug that silently zeroed the
+  backtest, a futures-vs-ETF price-scale bug that produced "+900%" gaps, a
+  same-day-resolution bug that would have scored predictions against an
+  in-progress intraday bar, and a sign-inversion bug in the put/call
+  contrarian logic) was caught by manual testing, not anything systematic -
+  the suite locks in the fixes as regression tests so they can't silently
+  come back.
+- **Watchdog**: `.github/workflows/watchdog.yml` runs independently of
+  `daily_outlook.yml` (different schedule, not an `if: failure()` hook on
+  it) and emails an alert if no successful run has committed data recently -
+  see `scripts/watchdog_check.py`. This catches both an outright job failure
+  and the case where GitHub silently stops triggering the schedule at all,
+  which a same-workflow failure hook can't.
 
 ## Limitations
 

@@ -1,0 +1,35 @@
+name: Watchdog
+
+# Independent schedule from daily_outlook.yml. If that workflow stops firing
+# entirely (e.g. GitHub silently disables it after inactivity, or a bad cron
+# edit), this still runs and alerts, because it does not depend on
+# daily_outlook.yml's own success/failure to be scheduled.
+
+on:
+  schedule:
+    - cron: "13 22 * * 1-5"   # ~6pm ET weekdays, well after the ~7am ET main run
+  workflow_dispatch: {}
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Check for stalled pipeline
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          PYTHONPATH: src
+        run: python scripts/watchdog_check.py

@@ -29,6 +29,8 @@ def _rsi(closes: pd.Series, period: int) -> float | None:
     gains = delta.clip(lower=0).tail(period)
     losses = (-delta.clip(upper=0)).tail(period)
     avg_gain, avg_loss = gains.mean(), losses.mean()
+    if avg_gain == 0 and avg_loss == 0:
+        return 50.0  # genuinely no movement at all - neutral, not "overbought"
     if avg_loss == 0:
         return 100.0
     rs = avg_gain / avg_loss
@@ -159,32 +161,31 @@ def _zscore(value: float | None, series: pd.Series) -> float | None:
 
 
 def options_flow_signal(chain_summary: dict, flow_history: pd.DataFrame) -> tuple[float, dict]:
-    """Two ingredients, both self-calibrated against our own logged history
-    since there's no free historical options chain to backtest against:
+    """Scored ingredient: put/call OI ratio z-score, treated as CONTRARIAN
+    (an unusually put-heavy book vs our own recent norm leans bullish, and
+    vice versa) - the traditional retail-sentiment reading of extreme
+    put/call skew.
 
-    - put/call OI ratio z-score: treated as CONTRARIAN (an unusually
-      put-heavy book vs our own recent norm leans bullish, and vice versa) —
-      the traditional retail-sentiment reading of extreme put/call skew.
-    - spot vs. the zero-gamma flip strike: above flip = dealers long gamma
-      => dampened/pinning (pulls the signal toward 0); below flip = dealers
-      short gamma => amplifying (pushes whatever the raw gap direction is
-      further in that direction).
+    Shown but NOT currently scored: spot vs. the zero-gamma flip strike
+    (above flip = dealers long gamma => dampened/pinning; below flip =
+    dealers short gamma => amplifying whatever direction price is already
+    moving). This is directionally meaningful but as a MODIFIER on other
+    signals (it says "trust the gap more/less"), not a standalone additive
+    term - properly wiring that in needs a composite-math change beyond a
+    simple weighted sum, so for now it's surfaced in the email's factor
+    breakdown for you to read qualitatively, not folded into the composite.
     """
     pc_ratio = chain_summary.get("put_call_oi_ratio")
     spot_vs_flip = chain_summary.get("spot_vs_flip_pct")
 
     pc_z = _zscore(pc_ratio, flow_history["put_call_oi_ratio"].dropna()) if len(flow_history) else None
-    pc_component = 0.0 if pc_z is None else -max(-1.0, min(1.0, pc_z / 2.0))  # contrarian: high P/C z -> bullish
-
-    amplification = 0.0
-    if spot_vs_flip is not None:
-        # magnitude of amplification/dampening grows the further spot is from the flip
-        amplification = max(-1.0, min(1.0, -spot_vs_flip / 1.0))  # negative spot_vs_flip (below flip) -> positive amplification factor scale
+    # contrarian: a put-heavy book (pc_z > 0) leans bullish, not bearish.
+    pc_component = 0.0 if pc_z is None else max(-1.0, min(1.0, pc_z / 2.0))
 
     value = max(-1.0, min(1.0, pc_component))
     return value, {
         "put_call_oi_ratio": pc_ratio, "put_call_oi_zscore": pc_z,
-        "spot_vs_flip_pct": spot_vs_flip, "amplification_factor": amplification,
+        "spot_vs_flip_pct": spot_vs_flip,
         "zero_gamma_flip": chain_summary.get("zero_gamma_flip"),
         "max_pain": chain_summary.get("max_pain"),
         "calibrated": pc_z is not None,
