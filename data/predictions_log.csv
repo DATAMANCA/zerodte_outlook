@@ -1,0 +1,5 @@
+date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
+2026-09-23,SPY,day,Neutral,0.11055068144215206,0.111,False,,
+2026-09-23,SPY,week,Neutral,0.08851576258910054,0.089,False,,
+2026-09-23,QQQ,day,Neutral,0.10705667314139344,0.107,False,,
+2026-09-23,QQQ,week,Bullish,0.4042032543360455,0.404,False,,
