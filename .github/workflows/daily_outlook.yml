@@ -1,0 +1,64 @@
+name: Daily 0DTE outlook email
+
+on:
+  schedule:
+    # ~7am ET during EDT (UTC-4), ~6am ET during EST (UTC-5) - always before
+    # the 9:30am ET open either way; see README for the DST tradeoff.
+    - cron: "0 11 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zerodte-outlook-daily
+  cancel-in-progress: false
+
+jobs:
+  outlook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run daily outlook and send email
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          PYTHONPATH: src
+        run: python -m zerodte_outlook.main
+
+      - name: Commit updated prediction log / flow history
+        run: |
+          if [ -z "$(git status --porcelain data/predictions_log.csv data/options_flow_history.csv 2>/dev/null)" ]; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/predictions_log.csv data/options_flow_history.csv
+          git commit -m "Update predictions log / options-flow history [skip ci]"
+
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt/5); rebasing onto latest remote and retrying."
+            git pull --rebase -X theirs origin "$(git rev-parse --abbrev-ref HEAD)"
+            sleep $((attempt * 3))
+          done
+
+          echo "::error::Failed to push updated data after 5 attempts."
+          exit 1

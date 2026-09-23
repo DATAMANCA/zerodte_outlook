@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# predictions_log.csv and options_flow_history.csv are INTENTIONALLY tracked -
+# GitHub Actions commits them back each run so the live accuracy tracker and
+# options-flow calibration history persist across days. Everything else in
+# data/ is a local, regenerable artifact.
+data/*.csv
+!data/predictions_log.csv
+!data/options_flow_history.csv
+data/*.md
+data/*.html
+logs/*.log
