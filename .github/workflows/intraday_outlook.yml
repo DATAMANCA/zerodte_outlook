@@ -1,0 +1,46 @@
+name: Hourly 0DTE intraday update
+
+# Re-scores SPY/QQQ each hour of the US session and emails the update.
+# Runs with --intraday, which writes nothing to data/ - the morning
+# daily_outlook.yml run stays the single logged prediction per day, so this
+# needs no commit step and no write permission.
+
+on:
+  schedule:
+    # :47 past 13-19 UTC = 9:47am-3:47pm ET during EDT (7 updates), or
+    # 8:47am-2:47pm ET during EST. Off the top of the hour because GitHub
+    # delays/drops :00 scheduled runs under load.
+    - cron: "47 13-19 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zerodte-outlook-intraday
+  cancel-in-progress: true
+
+jobs:
+  intraday:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run intraday update and send email
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          PYTHONPATH: src
+        run: python -m zerodte_outlook.main --intraday

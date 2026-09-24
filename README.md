@@ -51,6 +51,12 @@ hour because GitHub drops :00 scheduled runs under load. Scheduled runs pass
 `--skip-if-already-ran`, so the second one only sends if the first didn't;
 manual "Run workflow" runs always send.
 
+`.github/workflows/intraday_outlook.yml` also sends an hourly update during
+the US session (:47 past 13-19 UTC on weekdays, i.e. 9:47am-3:47pm ET in
+EDT). It runs with `--intraday`, which re-scores and emails but writes
+nothing to `data/`, so the morning email stays the one logged prediction per
+day that the accuracy tracking scores.
+
 ## How the score works
 
 Each ticker gets two composites, **Day** and **Week**, each a weighted
