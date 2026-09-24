@@ -40,6 +40,11 @@ def load() -> pd.DataFrame:
     return df
 
 
+def has_run_for(df: pd.DataFrame, day: date) -> bool:
+    """True if predictions for `day` are already logged, i.e. that day's email already went out."""
+    return bool((df["date"].astype(str) == day.isoformat()).any())
+
+
 def save(df: pd.DataFrame) -> None:
     config.PREDICTIONS_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(config.PREDICTIONS_LOG_PATH, index=False)

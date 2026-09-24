@@ -2,9 +2,14 @@ name: Daily 0DTE outlook email
 
 on:
   schedule:
-    # ~7am ET during EDT (UTC-4), ~6am ET during EST (UTC-5) - always before
-    # the 9:30am ET open either way; see README for the DST tradeoff.
-    - cron: "0 11 * * 1-5"
+    # ~6:23am ET during EDT (UTC-4), ~5:23am ET during EST (UTC-5) - always
+    # before the 9:30am ET open either way; see README for the DST tradeoff.
+    # Deliberately off the top of the hour: GitHub delays and can silently
+    # drop scheduled runs at :00 under load (the 11:00 UTC run on 2026-09-24
+    # never fired). The second cron is a backup - scheduled runs pass
+    # --skip-if-already-ran so it only sends if the first one didn't.
+    - cron: "23 10 * * 1-5"
+    - cron: "08 11 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
@@ -37,7 +42,9 @@ jobs:
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           PYTHONPATH: src
-        run: python -m zerodte_outlook.main
+        # Manual (workflow_dispatch) runs always send; scheduled runs skip if
+        # today's email already went out.
+        run: python -m zerodte_outlook.main ${{ github.event_name == 'schedule' && '--skip-if-already-ran' || '' }}
 
       - name: Commit updated prediction log / flow history
         run: |

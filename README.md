@@ -46,6 +46,11 @@ In production this runs on a schedule via GitHub Actions
 required repo secrets (`GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`,
 `RECIPIENT_EMAIL`, `FRED_API_KEY`).
 
+It is scheduled twice each weekday (10:23 and 11:08 UTC), off the top of the
+hour because GitHub drops :00 scheduled runs under load. Scheduled runs pass
+`--skip-if-already-ran`, so the second one only sends if the first didn't;
+manual "Run workflow" runs always send.
+
 ## How the score works
 
 Each ticker gets two composites, **Day** and **Week**, each a weighted

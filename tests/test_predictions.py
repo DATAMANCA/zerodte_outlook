@@ -92,3 +92,16 @@ def test_accuracy_summary_only_counts_resolved_directional_calls():
     summary = predictions.accuracy_summary(df)
     assert summary[("SPY", "day")]["n"] == 2
     assert summary[("SPY", "day")]["hit_rate"] == 0.5
+
+
+def test_has_run_for_detects_already_logged_day():
+    empty = pd.DataFrame(columns=predictions.COLUMNS)
+    assert not predictions.has_run_for(empty, date(2026, 9, 24))
+
+    scorecards = {
+        "SPY": {"day": {"label": "Bullish", "composite": 0.5, "confidence": 0.5},
+                "week": {"label": "Neutral", "composite": 0.0, "confidence": 0.0}},
+    }
+    df = predictions.append_new(empty, date(2026, 9, 23), scorecards)
+    assert predictions.has_run_for(df, date(2026, 9, 23))
+    assert not predictions.has_run_for(df, date(2026, 9, 24))

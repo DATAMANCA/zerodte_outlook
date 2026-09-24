@@ -3,6 +3,10 @@
     python -m zerodte_outlook.main             # fetches live data and sends the email
     python -m zerodte_outlook.main --dry-run   # same, but writes the email to
                                                 # data/last_email.html instead of sending
+    python -m zerodte_outlook.main --skip-if-already-ran
+                                                # no-op if today's predictions are already
+                                                # logged (used by the backup cron so it
+                                                # doesn't send a second email)
 """
 import argparse
 import logging
@@ -24,9 +28,13 @@ def _setup_logging() -> None:
     logging.getLogger("yfinance").setLevel(logging.CRITICAL)
 
 
-def run(dry_run: bool = False) -> None:
+def run(dry_run: bool = False, skip_if_already_ran: bool = False) -> None:
     today = date.today()
     logger.info("Starting run for %s (dry_run=%s)", today, dry_run)
+
+    if skip_if_already_ran and predictions.has_run_for(predictions.load(), today):
+        logger.info("Predictions for %s already logged; email already sent today - skipping.", today)
+        return
 
     market_history = {t: market.get_daily_history(t, years=1) for t in config.TICKERS}
     vix_history = market.get_daily_history(market.VIX_SYMBOL, years=1)
@@ -76,6 +84,7 @@ def run(dry_run: bool = False) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--skip-if-already-ran", action="store_true")
     args = parser.parse_args()
     _setup_logging()
-    run(dry_run=args.dry_run)
+    run(dry_run=args.dry_run, skip_if_already_ran=args.skip_if_already_ran)
