@@ -170,3 +170,14 @@ def test_load_flow_history_missing_file_returns_empty(tmp_path, monkeypatch):
     monkeypatch.setattr(features.config, "DATA_DIR", tmp_path)
     df = features.load_flow_history("SPY", "day")
     assert df.empty
+
+
+def test_append_flow_snapshot_same_day_replaces(tmp_path, monkeypatch):
+    monkeypatch.setattr(features.config, "DATA_DIR", tmp_path)
+    features.append_flow_snapshot("2026-09-01", "SPY", "day", 1.1, 2.0)
+    features.append_flow_snapshot("2026-09-01", "SPY", "week", 3.0, 1.0)
+    features.append_flow_snapshot("2026-09-01", "SPY", "day", 1.5, 4.0)
+    spy_day = features.load_flow_history("SPY", "day")
+    assert len(spy_day) == 1
+    assert spy_day.iloc[0]["put_call_oi_ratio"] == 1.5
+    assert len(features.load_flow_history("SPY", "week")) == 1

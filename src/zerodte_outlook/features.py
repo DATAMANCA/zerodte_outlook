@@ -142,13 +142,20 @@ def load_flow_history(ticker: str, horizon: str) -> pd.DataFrame:
 def append_flow_snapshot(today_iso: str, ticker: str, horizon: str, pc_ratio: float | None, spot_vs_flip: float | None) -> None:
     path = _flow_history_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    is_new = not path.exists()
-    with open(path, "a", newline="", encoding="utf-8") as f:
+    # Keep one row per date/ticker/horizon: a manual re-run on the same day
+    # replaces that day's snapshot instead of double-weighting it in the
+    # z-score baseline.
+    rows = []
+    if path.exists():
+        with open(path, newline="", encoding="utf-8") as f:
+            rows = [r for r in csv.DictReader(f)
+                    if (r["date"], r["ticker"], r["horizon"]) != (today_iso, ticker, horizon)]
+    rows.append({"date": today_iso, "ticker": ticker, "horizon": horizon,
+                 "put_call_oi_ratio": pc_ratio, "spot_vs_flip_pct": spot_vs_flip})
+    with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=_FLOW_HISTORY_COLUMNS)
-        if is_new:
-            w.writeheader()
-        w.writerow({"date": today_iso, "ticker": ticker, "horizon": horizon,
-                    "put_call_oi_ratio": pc_ratio, "spot_vs_flip_pct": spot_vs_flip})
+        w.writeheader()
+        w.writerows(rows)
 
 
 def _zscore(value: float | None, series: pd.Series) -> float | None:

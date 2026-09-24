@@ -105,3 +105,15 @@ def test_has_run_for_detects_already_logged_day():
     df = predictions.append_new(empty, date(2026, 9, 23), scorecards)
     assert predictions.has_run_for(df, date(2026, 9, 23))
     assert not predictions.has_run_for(df, date(2026, 9, 24))
+
+def test_append_new_same_day_replaces_rather_than_duplicates():
+    empty = pd.DataFrame(columns=predictions.COLUMNS)
+    card = {"SPY": {"day": {"label": "Bullish", "composite": 0.5, "confidence": 0.5},
+                    "week": {"label": "Neutral", "composite": 0.0, "confidence": 0.0}}}
+    df = predictions.append_new(empty, date(2026, 9, 23), card)
+    df = predictions.append_new(df, date(2026, 9, 24), card)
+    card["SPY"]["day"]["label"] = "Bearish"
+    df = predictions.append_new(df, date(2026, 9, 24), card)
+    assert len(df) == 4
+    today = df[df["date"] == "2026-09-24"]
+    assert list(today[today["horizon"] == "day"]["label"]) == ["Bearish"]

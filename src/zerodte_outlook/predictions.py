@@ -62,6 +62,9 @@ def append_new(df: pd.DataFrame, today: date, scorecards: dict) -> pd.DataFrame:
             })
     if not new_rows:
         return df
+    # A manual re-run on the same day replaces that day's rows rather than
+    # duplicating them, so accuracy stats count each day once.
+    df = df[df["date"].astype(str) != today.isoformat()]
     return pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
 
 
