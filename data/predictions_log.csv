@@ -28,9 +28,9 @@ date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
 2026-10-01,QQQ,day,Neutral,0.0709565978223095,0.053,True,Down,
 2026-10-01,QQQ,week,Bullish,0.5113399963127895,0.256,True,Up,True
 2026-10-02,SPY,day,Neutral,0.1243214085270349,0.093,True,Down,
-2026-10-02,SPY,week,Bullish,0.1431249128352992,0.107,False,,
+2026-10-02,SPY,week,Bullish,0.1431249128352992,0.107,True,Up,True
 2026-10-02,QQQ,day,Neutral,0.1141283964109458,0.086,True,Down,
-2026-10-02,QQQ,week,Bullish,0.5697196210842368,0.427,False,,
+2026-10-02,QQQ,week,Bullish,0.5697196210842368,0.427,True,Up,True
 2026-10-05,SPY,day,Neutral,0.0935093706391127,0.07,True,Up,
 2026-10-05,SPY,week,Bullish,0.168416155405673,0.126,False,,
 2026-10-05,QQQ,day,Neutral,0.0729955579723461,0.055,True,Up,
@@ -43,7 +43,11 @@ date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
 2026-10-07,SPY,week,Bullish,0.2132164253281173,0.213,False,,
 2026-10-07,QQQ,day,Neutral,0.0407875639569559,0.041,True,Up,
 2026-10-07,QQQ,week,Bullish,0.5431770186155191,0.543,False,,
-2026-10-08,SPY,day,Bullish,0.27899963844140446,0.279,False,,
-2026-10-08,SPY,week,Bullish,0.23984121386150817,0.24,False,,
-2026-10-08,QQQ,day,Neutral,0.048102019046896455,0.048,False,,
+2026-10-08,SPY,day,Bullish,0.2789996384414044,0.279,True,Down,False
+2026-10-08,SPY,week,Bullish,0.2398412138615081,0.24,False,,
+2026-10-08,QQQ,day,Neutral,0.0481020190468964,0.048,True,Down,
 2026-10-08,QQQ,week,Bullish,0.5259133362960364,0.526,False,,
+2026-10-09,SPY,day,Neutral,0.05645297760118158,0.056,False,,
+2026-10-09,SPY,week,Bullish,0.3313437769126009,0.331,False,,
+2026-10-09,QQQ,day,Neutral,0.052545929230134285,0.053,False,,
+2026-10-09,QQQ,week,Bullish,0.5566853704142165,0.557,False,,
