@@ -92,9 +92,9 @@ date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
 2026-10-23,QQQ,day,Neutral,-0.12381619617784151,0.093,True,Up,
 2026-10-23,QQQ,week,Bearish,-0.5356769124803811,0.402,True,Down,True
 2026-10-26,SPY,day,Bullish,0.24988129862444652,0.25,True,Up,True
-2026-10-26,SPY,week,Neutral,-0.02221925684170615,0.011,False,,
+2026-10-26,SPY,week,Neutral,-0.02221925684170615,0.011,True,Down,
 2026-10-26,QQQ,day,Neutral,-0.07333997554461961,0.073,True,Up,
-2026-10-26,QQQ,week,Bearish,-0.4963158784569544,0.248,False,,
+2026-10-26,QQQ,week,Bearish,-0.4963158784569544,0.248,True,Down,True
 2026-10-27,SPY,day,Neutral,-0.032862539787905536,0.033,True,Up,
 2026-10-27,SPY,week,Neutral,-0.011412301777110839,0.006,False,,
 2026-10-27,QQQ,day,Neutral,-0.06610509542581054,0.066,True,Up,
@@ -107,7 +107,11 @@ date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
 2026-10-29,SPY,week,Neutral,0.04977596266271306,0.037,False,,
 2026-10-29,QQQ,day,Neutral,0.0415456031769645,0.031,True,Down,
 2026-10-29,QQQ,week,Bearish,-0.39295886784665596,0.295,False,,
-2026-10-30,SPY,day,Bullish,0.20315605653889945,0.203,False,,
+2026-10-30,SPY,day,Bullish,0.20315605653889945,0.203,True,Down,False
 2026-10-30,SPY,week,Bearish,-0.11626969448398526,0.116,False,,
-2026-10-30,QQQ,day,Neutral,-0.08484237769066051,0.085,False,,
+2026-10-30,QQQ,day,Neutral,-0.08484237769066051,0.085,True,Down,
 2026-10-30,QQQ,week,Bearish,-0.5328590729730824,0.533,False,,
+2026-11-02,SPY,day,Neutral,0.0009073010457621063,0.001,False,,
+2026-11-02,SPY,week,Bearish,-0.22241976076155437,0.089,False,,
+2026-11-02,QQQ,day,Neutral,-0.1650003088779232,0.124,False,,
+2026-11-02,QQQ,week,Bearish,-0.5678949873900294,0.227,False,,
