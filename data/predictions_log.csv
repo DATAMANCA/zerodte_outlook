@@ -179,7 +179,11 @@ date,ticker,horizon,label,composite,confidence,resolved,actual_direction,correct
 2026-11-24,SPY,week,Bearish,-0.6898319799915128,0.345,False,,
 2026-11-24,QQQ,day,Neutral,-0.0645554951258767,0.048,True,Down,
 2026-11-24,QQQ,week,Bearish,-0.5356715927065335,0.268,False,,
-2026-11-25,SPY,day,Bearish,-0.3772952149879599,0.283,False,,
+2026-11-25,SPY,day,Bearish,-0.3772952149879599,0.283,True,Up,False
 2026-11-25,SPY,week,Bearish,-0.711763964558745,0.534,False,,
-2026-11-25,QQQ,day,Neutral,-0.16191249847593545,0.121,False,,
+2026-11-25,QQQ,day,Neutral,-0.16191249847593545,0.121,True,Up,
 2026-11-25,QQQ,week,Bearish,-0.5571608318614508,0.418,False,,
+2026-11-26,SPY,day,Bearish,-0.3533222312614804,0.353,False,,
+2026-11-26,SPY,week,Bearish,-0.7158060186691156,0.716,False,,
+2026-11-26,QQQ,day,Neutral,-0.17135346090005296,0.171,False,,
+2026-11-26,QQQ,week,Bearish,-0.5680290970997466,0.568,False,,
